@@ -24,6 +24,8 @@ object Lists:
       *   The sum of all elements in `xs`
       */
     def sum(xs: List[Int]): Int = {
+        if (xs.isEmpty)
+            throw new java.util.NoSuchElementException;
         val tail: List[Int] = xs.tail;
         if (tail.isEmpty)
             return xs.head;
