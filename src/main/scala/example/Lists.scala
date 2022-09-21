@@ -25,7 +25,7 @@ object Lists:
       */
     def sum(xs: List[Int]): Int = {
         if (xs.isEmpty)
-            throw new java.util.NoSuchElementException;
+            return 0;
         val tail: List[Int] = xs.tail;
         if (tail.isEmpty)
             return xs.head;
