@@ -24,12 +24,14 @@ object Lists:
       *   The sum of all elements in `xs`
       */
     def sum(xs: List[Int]): Int = {
-        if (xs.isEmpty)
-            return 0;
-        val tail: List[Int] = xs.tail;
-        if (tail.isEmpty)
-            return xs.head;
-        return xs.head + sum(xs.tail);
+        if (xs.isEmpty) 0
+        else {
+            val tail: List[Int] = xs.tail
+            if (tail.isEmpty)
+                xs.head
+            else
+                xs.head + sum(xs.tail)
+        }
     }
 
     /** This method returns the largest element in a list of integers. If the
@@ -50,10 +52,12 @@ object Lists:
     def max(xs: List[Int]): Int = {
         if (xs.isEmpty)
             throw new java.util.NoSuchElementException;
-        if (xs.tail.isEmpty)
-            return xs.head
-        val other_max: Int = max(xs.tail)
-        if (xs.head > other_max)
-            return xs.head
-        return other_max
+        if (xs.tail.isEmpty) xs.head
+        else {
+            val other_max: Int = max(xs.tail)
+            if (xs.head > other_max)
+                xs.head
+            else
+                other_max
+        }
     }
