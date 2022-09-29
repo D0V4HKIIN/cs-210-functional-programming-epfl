@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s1
 
-object S1 {
+object S1:
 
   /**
    *
@@ -11,5 +10,3 @@ object S1 {
    * @return A list of all the suffixes of `ls`
    */
   def tails(ls: List[Int]): List[List[Int]] = ???
-
-}

@@ -4,8 +4,10 @@
 *.class
 *.tasty
 target/
+metals.sbt
 logs/
 .bloop
+.bsp
 .dotty-ide-artifact
 .dotty-ide.json
 .idea
@@ -13,4 +15,4 @@ logs/
 .vscode
 *.csv
 *.dat
-/project/**/metals.sbt
+.bsp
