@@ -1,41 +1,42 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s11
 
 /**
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class S11Suite extends munit.FunSuite {
+class S11Suite extends munit.FunSuite:
 
   import S11._
+  import S11SuiteIO._
 
-  def mkTest(i: Int): ((List[Int], Int), List[Int], String) = { 
-    if (i == 1) ((List(), 5), List(), "drop every n-th element of an empty list")
-    else if (i == 2) ((List(3, 7, 5), 2), List(3, 5), "drop every other element of a non-empty list 3")
-    else if (i == 3) ((List(4, 8), 3), List(4, 8), "drop every third element of a non-empty list 2")
-    else ((List(), 5), List(), "drop every n-th element of an empty list")
-  }
+  extension (t: Tests)
 
-  test("test everything (10pts)") {
-    (1 to 3).foreach((i: Int) => {
-      val (in, out, msg) = mkTest(i)
-      assertEquals(drop(in._1, in._2), out, msg)
-    })
-  }
+    def title: String =
+      t match
+        case DropWorksOnSimpleCase(ls, n, exp, pts) =>
+          s"Drop every $n element in a list of size ${ls.length} ($pts pts)"
+        case DropThrowsException(_, n, pts) =>
+          s"Exception is thrown when trying to drop $n elements ($pts pts)"
 
-  test("drop every n-th element of an empty list (10pts)") {
-    assertEquals(drop(List(), 5), List())
-  }
+    def msg: String =
+      t match
+        case DropWorksOnSimpleCase(ls, n, exp, pts) =>
+          s"Wrong result when dropping every $n element in a list of size ${ls.length}"
+        case DropThrowsException(_, n, _) =>
+          s"An Exception should have been thrown when trying to drop $n elements"
 
-  test("drop every other element of a non-empty list 3 (10pts)") {
-    assertEquals(drop(List(3, 7, 5), 2), List(3, 5))
-  }
+    def execute: Unit =
+      t match
+        case d: DropWorksOnSimpleCase =>
+          assertEquals(drop(d.ls.toList, d.n), d.exp.toList, d.msg)
+        case e: DropThrowsException =>
+          intercept[IllegalArgumentException] {
+            drop(e.ls.toList, e.n)
+          }
 
-  test("drop every third element of a non-empty list 2 (10pts)") {
-    assertEquals(drop(List(4, 8), 3), List(4, 8))
-  }
-
+  allTests.foreach(t =>
+    test(t.title) { t.execute }
+  )
 
   override val munitTimeout = scala.concurrent.duration.Duration(1, "s")
-}
