@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e2q2
 
-object E2Q2 {
+object E2Q2:
 
 /**
   * The identity function
@@ -25,5 +24,3 @@ object E2Q2 {
   * @return The function that repeats `f` for `n` iterations
   */
   def repeated(f: Int => Int, n: Int): Int => Int = ???
-
-}
