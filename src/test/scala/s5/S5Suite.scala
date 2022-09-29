@@ -1,41 +1,42 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s5
 
 /**
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class S5Suite extends munit.FunSuite {
+class S5Suite extends munit.FunSuite:
 
   import S5._
+  import S5SuiteIO._
 
-  def mkTest(i: Int): (List[Int], List[Int], String) = { 
-    if (i == 1) (List(), List(), "every other element of an empty list")
-    else if (i == 2) (List(3, 7, 5), List(3, 5), "every other element of a non-empty list 3")
-    else if (i == 3) (List(4, 8), List(4), "every other element of a non-empty list 2")
-    else (List(), List(), "every other element of an empty list")
-  }
+  extension (t: Tests)
+    def title: String =
+      t match
+        case EvenSlotsWorksOnSimpleCase(arg, _, pts) =>
+          val size = arg.length
+          if size == 0 then 
+            s"Even slots elements of an empty list ($pts pts)"
+          else 
+            s"Even slots elements of a list of size : $size ($pts pts)"
+    
+    def msg: String =
+      t match
+        case EvenSlotsWorksOnSimpleCase(arg, _, _) =>
+          val size = arg.length
+          if size == 0 then 
+            s"Wrong result for an empty list"
+          else 
+            s"Wrong result for a list of size : $size"
+          
+    def execute: Unit =
+      t match
+        case e: EvenSlotsWorksOnSimpleCase =>
+          assertEquals(evenSlots(e.arg.toList), e.exp.toList, e.msg)
+      
 
-  test("test everything (10pts)") {
-    (1 to 3).foreach((i: Int) => {
-      val (in, out, msg) = mkTest(i)
-      assertEquals(everyOther(in), out, msg)
-    })
-  }
-
-  test("every other element of an empty list (10pts)") {
-    assertEquals(everyOther(List()), List())
-  }
-
-  test("every other element of a non-empty list 3 (10pts)") {
-    assertEquals(everyOther(List(3, 7, 5)), List(3, 5))
-  }
-
-  test("every other element of a non-empty list 2 (10pts)") {
-    assertEquals(everyOther(List(4, 8)), List(4))
-  }
-
+  allTests.foreach(t =>
+    test(t.title) { t.execute }
+  )
 
   override val munitTimeout = scala.concurrent.duration.Duration(1, "s")
-}

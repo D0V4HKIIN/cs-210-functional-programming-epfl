@@ -1,15 +1,12 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s5
 
-object S5 {
+object S5:
 
   /**
     *
     * @param ls A list of natural numbers
-    * @return A list containing every other element of `ls` (in the same order of appearance)
+    * @return A list containing every element stored at an even index in `ls` (in the same order of appearance)
     */
-  def everyOther(ls: List[Int]): List[Int] = ???
-
-}
+  def evenSlots(ls: List[Int]): List[Int] = ???
