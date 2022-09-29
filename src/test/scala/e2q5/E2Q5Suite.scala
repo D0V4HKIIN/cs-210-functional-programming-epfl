@@ -1,84 +1,63 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e2q5
 
 /**
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class E2Q5Suite extends munit.FunSuite {
+class E2Q5Suite extends munit.FunSuite:
 
   import E2Q5._
+  import E2Q5SuiteIO._
 
-  def mkTest1(i: Int): ((Int, Int), Int => Int, Int, String) = { 
-    if (i == 1) ((1, 10), x => x, 55, "sum of integers")
-    else if (i == 2) ((1, 10), x => x*x, 385, "sum of squares of integers")
-    else ((1, 10), x => x, 55, "sum of integers")
-  }
+  extension (t: Tests)
+    def title: String =
+      t match
+        case SimpleCaseSumF(f, a, b, exp, fname, pts) =>
+          s"Sum of $fname from $a to $b ($pts pts)"
+        case SimpleCaseQuadratic(c, arg, exp, pts) =>
+          s"Quadratic with c = $c ($pts pts)"
+        case SimpleCaseQuad3Integrate(a, b, exp, pts) =>
+          val n = b - a
+          s"Quad3Integrate for $n values ($pts pts)"
+        case ExceptionOnSumF(f, a, b, pts) =>
+          s"Exception for sum() applied between $a and $b ($pts pts)"
+        case ExceptionOnQuad3Integrate(a, b, pts) =>
+          s"Exception for Quad3Integrate between $a and $b ($pts pts)"
 
-  def mkTest2(i: Int): (Int, Int, Int, String) = { 
-    if (i == 1) (0, 1, 1, "quadratic with c=0")
-    else if (i == 2) (5, 10, 25, "quadratic with c=5")
-    else if (i == 3) (10, 10, 0, "quadratic with c=10")
-    else (0, 1, 1, "quadratic with c=0")
-  }
-
-  def mkTest3(i: Int): ((Int, Int), Int, String) = { 
-    if (i == 1) ((4, 5), 1, "quad3Integrate for one value")
-    else if (i == 2) ((5, 7), 13, "quad3Integrate for 2 values")
-    else if (i == 3) ((4, 104), 338350, "quad3Integrate for many values")
-    else ((4, 5), 1, "quad3Integrate 0 time")
-  }
-
-  test("test everything (10pts)") {
-    (1 to 2).foreach((i: Int) => {
-      val (in, arg, out, msg) = mkTest1(i)
-      assertEquals(sum(in._1, in._2)(arg), out, msg)
-    })
-
-    (1 to 3).foreach((i: Int) => {
-      val (in, arg, out, msg) = mkTest2(i)
-      assertEquals(quadratic(in)(arg), out, msg)
-    })
-
-    (1 to 3).foreach((i: Int) => {
-      val (in, out, msg) = mkTest3(i)
-      assertEquals(quad3Integrate(in._1, in._2), out, msg)
-    })
-  }
-
-  test("sum of integers (10pts)") {
-    assertEquals(sum(1, 10)(x => x), 55)
-  }
-
-  test("sum of squares of integers (10pts)") {
-    assertEquals(sum(1, 10)(x => x*x), 385)
-  }
-
-  test("quadratic with c=0 (10pts)") {
-    assertEquals(quadratic(0)(1), 1)
-  }
-
-  test("quadratic with c=5 (10pts)") {
-    assertEquals(quadratic(5)(10), 25)
-  }
-
-  test("quadratic with c=10 (10pts)") {
-    assertEquals(quadratic(10)(10), 0)
-  }
-
-  test("quad3Integrate for one value (10pts)") {
-    assertEquals(quad3Integrate(4, 5), 1)
-  }
-
-  test("quad3Integrate for two values (10pts)") {
-    assertEquals(quad3Integrate(5, 7), 13)
-  }
-
-  test("quad3Integrate for many values (10pts)") {
-    assertEquals(quad3Integrate(4, 104), 338350)
-  }
-
-
+    def msg: String =
+      t match
+        case SimpleCaseSumF(f, a, b, exp, fname, pts) =>
+          s"Wrong result for the sum of $fname between $a and $b"
+        case SimpleCaseQuadratic(c, arg, exp, pts) =>
+          s"Wrong result for the quadratic of $arg with c = $c"
+        case SimpleCaseQuad3Integrate(a, b, exp, pts) =>
+          s"Wrong result for quad3Integrate between $a and $b"
+        case ExceptionOnSumF(f, a, b, pts) =>
+          s"An Exception should have been thrown for a given wrong interval : [$a, $b]"
+        case ExceptionOnQuad3Integrate(a, b, pts) =>
+          s"An Exception should have been thrown for the wrong arguments : a = $a and b = $b"
+    
+    def execute: Unit =
+      t match 
+        case s: SimpleCaseSumF =>
+          assertEquals(sum(s.a, s.b)(s.f), s.exp, s.msg)
+        case q: SimpleCaseQuadratic =>
+          assertEquals(quadratic(q.c)(q.arg), q.exp, q.msg)
+        case q3: SimpleCaseQuad3Integrate =>
+          assertEquals(quad3Integrate(q3.a, q3.b), q3.exp, q3.msg)
+        case es: ExceptionOnSumF =>
+          intercept[java.lang.IllegalArgumentException] {
+            sum(es.a, es.b)(es.f)
+          }
+        case eq: ExceptionOnQuad3Integrate =>
+          intercept[IllegalArgumentException] {
+            quad3Integrate(eq.a, eq.b)
+          }
+  
+  allTests.foreach(t =>
+    test(t.title) { t.execute }
+  )
+  
   override val munitTimeout = scala.concurrent.duration.Duration(1, "s")
-}
+

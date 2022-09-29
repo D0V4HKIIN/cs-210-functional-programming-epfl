@@ -1,9 +1,10 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e2q5
 
-object E2Q5 {
+import annotation.tailrec
+
+object E2Q5:
 
 /**
   * 
@@ -31,5 +32,3 @@ object E2Q5 {
   * @return The sum of `(i - 3)²` where `i` ranges from `a` to `b - 1`
   */
   def quad3Integrate(a: Int, b: Int): Int = ???
-
-}
