@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e3q1
 
-object E3Q1 {
+object E3Q1:
 
   /**
     * The less-than-or-equal operator
@@ -19,5 +18,3 @@ object E3Q1 {
    * The striclty-less-than operator using `intLeq`
    */
   val intLess: (Int, Int) => Boolean = ???
-
-}
