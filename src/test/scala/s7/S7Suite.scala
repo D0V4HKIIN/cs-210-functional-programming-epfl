@@ -1,41 +1,34 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s7
 
 /**
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class S7Suite extends munit.FunSuite {
+class S7Suite extends munit.FunSuite:
 
   import S7._
+  import S7SuiteIO._
 
-  def mkTest(i: Int): (List[Any], List[Any], String) = { 
-    if (i == 1) (List(), List(), "flatten an empty list")
-    else if (i == 2) (List(3, 7, 5), List(3, 7, 5), "flatten a non-empty list 3")
-    else if (i == 3) (List(List(4), 8), List(4, 8), "flatten a non-empty list 2")
-    else (List(), List(), "flatten an empty list")
-  }
+  extension (t: Tests)
 
-  test("test everything (10pts)") {
-    (1 to 3).foreach((i: Int) => {
-      val (in, out, msg) = mkTest(i)
-      assertEquals(flatten(in), out, msg)
-    })
-  }
+    def title: String = 
+      t match
+        case FlattenWorksOnIntList(arg, exp, descr, pts) =>
+          s"Flatten $descr ($pts pts)"
 
-  test("flatten an empty list (10pts)") {
-    assertEquals(flatten(List()), List())
-  }
+    def msg: String = 
+      t match
+        case FlattenWorksOnIntList(_, _, descr, pts) =>
+          s"Wrong result for $descr"
+      
+    def execute: Unit = 
+      t match
+        case f: FlattenWorksOnIntList =>
+          assertEquals(flatten(f.arg), f.exp.toList, f.msg)
 
-  test("flatten a non-empty list 3 (10pts)") {
-    assertEquals(flatten(List(3, 7, 5)), List(3, 7, 5))
-  }
-
-  test("flatten a non-empty list 2 (10pts)") {
-    assertEquals(flatten(List(List(4), 8)), List(4, 8))
-  }
-
+  allTests.foreach(t => 
+    test(t.title) { t.execute }
+  ) 
 
   override val munitTimeout = scala.concurrent.duration.Duration(1, "s")
-}

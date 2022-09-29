@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s7
 
-object S7 {
+object S7:
 
   /**
     *
@@ -11,5 +10,3 @@ object S7 {
     * @return The flattened version of `ls`
     */
   def flatten(ls: List[Any]): List[Any] = ???
-
-}
