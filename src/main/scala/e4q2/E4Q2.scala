@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e4q2
 
-object E4Q2 {
+object E4Q2:
 
   abstract class Expr
   case class Number(x: Int) extends Expr
@@ -18,5 +17,3 @@ object E4Q2 {
     * @return The partial derivative of `expr` with respect to the variable `v`
     */
   def deriv(expr: Expr, v: String): Expr = ???
-
-}
