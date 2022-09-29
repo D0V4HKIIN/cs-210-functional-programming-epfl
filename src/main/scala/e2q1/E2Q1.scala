@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e2q1
 
-object E2Q1 {
+object E2Q1:
 
   /**
    *
@@ -11,5 +10,3 @@ object E2Q1 {
    * @return The same function but with the arguments flipped
    */
   def flip(f: (Int, Double) => Int): (Double, Int) => Int = ???
-
-}

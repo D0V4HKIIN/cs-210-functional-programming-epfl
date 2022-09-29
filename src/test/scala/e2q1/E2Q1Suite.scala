@@ -1,46 +1,69 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e2q1
 
 /**
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class E2Q1Suite extends munit.FunSuite {
+class E2Q1Suite extends munit.FunSuite:
 
   import E2Q1._
+  import E2Q1SuiteIO._
 
-  def mkTest(i: Int): ((Int, Double) => Int, (Double, Int), Int, String) = { 
-    if (i == 1) ((i, d) => i, (3.5, 1), 1, "identity")
-    else if (i == 2) ((i, d) => i * d.intValue, (4.729, 8), 32, "multiplication")
-    else if (i == 3) ((i, d) => i / d.intValue, (1, 0), 0, "division")
-    else if (i == 4) ((i, d) => if i > d then i else d.intValue, (150.1, 25), 150, "comparison")
-    else ((i, d) => i, (3.5, 1), 1, "identity")
-  }
+  extension (t: Tests)
+          
+    def title: String = 
+      t match
+        case Identity(args, exp, pts) =>
+          val fname = t.fname
+          s"Flip an $fname function with $args as argument ($pts pts)"
+        case Substraction(args, exp, pts) =>
+          fill_title(args, pts, t.fname)
+        case Multiplication(args, exp, pts) =>
+          fill_title(args, pts, t.fname)
+        case Division(args, exp, pts) =>
+          fill_title(args, pts, t.fname)
+        case Comparison(args, exp, pts) =>
+          fill_title(args, pts, t.fname)
 
-  test("test everything (10pts)") {
-    (1 to 4).foreach((i: Int) => {
-      val (in, args, out, msg) = mkTest(i)
-      assertEquals(flip(in)(args._1, args._2), out, msg)
-    })
-  }
+    def msg: String =
+      t match
+        case Identity(args, exp, pts) =>
+          val fname = t.fname
+          s"Incorrect value for an $fname"
+        case Substraction(args, exp, pts) =>
+          fill_msg(t.fname)
+        case Multiplication(args, exp, pts) =>
+          fill_msg(t.fname)
+        case Division(args, exp, pts) =>
+          fill_msg(t.fname)
+        case Comparison(args, exp, pts) =>
+          fill_msg(t.fname)
+        
+    def execute: Unit =
+      t match
+        case i: Identity =>
+          fill_assert(i.f, i.args, i.exp, i.msg)
+        case s: Substraction =>
+          fill_assert(s.f, s.args, s.exp, s.msg)
+        case m: Multiplication => 
+          fill_assert(m.f, m.args, m.exp, m.msg)
+        case d: Division =>
+          fill_assert(d.f, d.args, d.exp, d.msg)
+        case c: Comparison =>
+          fill_assert(c.f, c.args, c.exp, c.msg)
 
-  test("identity (10pts)") {
-    assertEquals(flip((i, d) => i)(3.5, 1), 1)
-  }
+  def fill_msg(fname: String): String =
+    s"Incorrect value for a $fname"
+  
+  def fill_title(args: (Double, Int), pts: Int, fname: String): String =
+    s"Flip a $fname function with $args as argument ($pts pts)"
 
-  test("multiplication (10pts)") {
-    assertEquals(flip((i, d) => i * d.intValue)(4.729, 8), 32)
-  }
+  def fill_assert(f: (i: Int, d: Double) => Int, args: (Double, Int), exp: Int, msg: String): Unit =
+    assertEquals(flip(f)(args._1, args._2), exp, msg)
 
-  test("division (10pts)") {
-    assertEquals(flip((i, d) => i / d.intValue)(1, 0), 0)
-  }
-
-  test("comparison (10pts)") {
-    assertEquals(flip((i, d) => if i > d then i else d.intValue)(150.1, 25), 150)
-  }
-
+  allTests.foreach(t => 
+    test(t.title) { t.execute }  
+  )
 
   override val munitTimeout = scala.concurrent.duration.Duration(1, "s")
-}
