@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s3
 
-object S3 {
+object S3:
 
   /**
     *
@@ -12,5 +11,3 @@ object S3 {
     * @return The `k`-th element of `ls`
     */
   def kth(k: Int, ls: List[Int]): Option[Int] = ???
-
-}
