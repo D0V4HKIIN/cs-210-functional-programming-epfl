@@ -1,41 +1,36 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e1q2
 
 /**
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class E1Q2Suite extends munit.FunSuite {
+class E1Q2Suite extends munit.FunSuite:
 
   import E1Q2._
+  import E1Q2SuiteIO._
 
-  def mkTest(i: Int): (List[Int], Int, String) = { 
-    if (i == 1) (List(), 0, "sum of an empty list")
-    else if (i == 2) (List(1, 2, 3), 6, "sum of a non-empty list 3")
-    else if (i == 3) (List(1998, 2018), 4016, "sum of a non-empty list 2")
-    else (List(), 0, "sum of an empty list")
-  }
+  extension (t: Tests)
 
-  test("test everything (10pts)") {
-    (1 to 3).foreach((i: Int) => {
-      val (in, out, msg) = mkTest(i)
-      assertEquals(sumList(in), out, msg)
-    })
-  }
+    def msg: String = 
+      t match 
+        case s: SimpleCaseWorks => 
+          val len = s.arg.length
+          s"Wrong sum for an array of size : $len"
 
-  test("sum of an empty list (10pts)") {
-    assertEquals(sumList(List()), 0)
-  }
+    def title: String = 
+      t match 
+        case SimpleCaseWorks(arg, exp, pts) => 
+          val len = arg.length
+          s"Sum of a list of size $len ($pts pts)"
 
-  test("sum of a non-empty list 3 (10pts)") {
-    assertEquals(sumList(List(1, 2, 3)), 6)
-  }
+    def execute: Unit =
+      t match 
+        case s: SimpleCaseWorks => 
+          assertEquals(sumList(s.arg.toList), s.exp, s.msg)
 
-  test("sum of a non-empty list 2 (10pts)") {
-    assertEquals(sumList(List(1998, 2018)), 4016)
-  }
-
+  allTest.foreach(t =>
+    test(t.title) { t.execute }  
+  )
 
   override val munitTimeout = scala.concurrent.duration.Duration(1, "s")
-}
