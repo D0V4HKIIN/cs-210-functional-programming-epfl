@@ -1,11 +1,10 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e1q4
 
 import annotation.tailrec
 
-object E1Q4 {
+object E1Q4:
 
   /**
     *
@@ -13,5 +12,3 @@ object E1Q4 {
     * @return The `n`-th fibonacci number
     */
   def fibonacci(n: Int): Int = ???
-
-}
