@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e2q3
 
-object E2Q3 {
+object E2Q3:
 
 /**
   * 
@@ -20,5 +19,3 @@ object E2Q3 {
   * @return The two-argument version of `f`
   */
   def uncurry2(f: Double => Int => Boolean): (Double, Int) => Boolean = ???
-
-}

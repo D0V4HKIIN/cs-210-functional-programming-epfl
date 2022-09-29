@@ -1,55 +1,56 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e2q3
 
 /**
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class E2Q3Suite extends munit.FunSuite {
+class E2Q3Suite extends munit.FunSuite:
 
   import E2Q3._
+  import E2Q3SuiteIO._
 
-  def mkTest1(i: Int): ((Double, Int) => Boolean, (Double, Int), Boolean, String) = { 
-    if (i == 1) ((d: Double, i: Int) => true, (1.0, 57), true, "curry a constant function")
-    else if (i == 2) ((d: Double, i: Int) => d > i, (17.5, 17), true, "curry an arbitrary function")
-    else ((d: Double, i: Int) => true, (1.0, 57), true, "curry a constant function")
-  }
+  extension (t: Tests)
 
-  def mkTest2(i: Int): (Double => Int => Boolean, (Double, Int), Boolean, String) = { 
-    if (i == 1) ((d: Double) => (i: Int) => false, (1.0, 57), false, "uncurry a constant function")
-    else if (i == 2) ((d: Double) => (i: Int) => d > i, (17.5, 18), false, "uncurry an arbitrary function")
-    else ((d: Double) => (i: Int) => true, (1.0, 57), true, "uncurry a constant function")
-  }
+    def title: String =
+      t match
+        case SimpleCaseWorks(f_uncur, f_cur, args, exp, fname, pts) =>
+          s"$fname ($pts pts)"
 
-  test("test everything (10pts)") {
-    (1 to 2).foreach((i: Int) => {
-      val (in, args, out, msg) = mkTest1(i)
-      assertEquals(curry2(in)(args._1)(args._2), out, msg)
-    })
+    def title_cur: String =
+      val str = t.title
+      s"curry $str"
 
-    (1 to 2).foreach((i: Int) => {
-      val (in, args, out, msg) = mkTest2(i)
-      assertEquals(uncurry2(in)(args._1, args._2), out, msg)
-    })
-  }
+    def title_uncur: String =
+      val str = t.title
+      s"uncurry $str"
 
-  test("curry a constant function (10pts)") {
-    assertEquals(curry2((d: Double, i: Int) => true)(1.0)(57), true)
-  }
+    def msg: String =
+      t match
+        case SimpleCaseWorks(_, _, args, _, fname, _) =>
+          s"Wrong value for $fname with $args as arguments"
+          
+    def msg_uncur: String =
+      val str = t.msg
+      s"$str when uncurrying"
 
-  test("curry an arbitrary function (10pts)") {
-    assertEquals(curry2((d: Double, i: Int) => d > i)(17.5)(17), true)
-  }
+    def msg_cur: String =
+      val str = t.msg
+      s"$str when currying"
 
-  test("uncurry a constant function (10pts)") {
-    assertEquals(uncurry2((d: Double) => (i: Int) => false)(1.0, 57), false)
-  }
+    def ex_cur: Unit =
+      t match
+        case s: SimpleCaseWorks =>
+          assertEquals(curry2(s.f_uncur)(s.args._1)(s.args._2), s.exp, s.msg_cur)
 
-  test("uncurry an arbitrary function (10pts)") {
-    assertEquals(uncurry2((d: Double) => (i: Int) => d > i)(17.5, 18), false)
-  }
+    def ex_uncur: Unit =
+      t match
+        case s: SimpleCaseWorks =>
+          assertEquals(uncurry2(s.f_cur)(s.args._1, s.args._2), s.exp, s.msg_uncur)
 
+  allTests.foreach(t =>
+    test(t.title_cur) { t.ex_cur }
+    test(t.title_uncur) { t.ex_uncur }
+  )
 
   override val munitTimeout = scala.concurrent.duration.Duration(1, "s")
-}
