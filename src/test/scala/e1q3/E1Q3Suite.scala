@@ -1,50 +1,53 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e1q3
+
+import scala.concurrent.duration.Duration.apply
+import java.util.concurrent.TimeUnit
 
 /**
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class E1Q3Suite extends munit.FunSuite {
+class E1Q3Suite extends munit.FunSuite:
 
   import E1Q3._
+  import scala.concurrent._
+  import ExecutionContext.Implicits.global
+  import scala.language.postfixOps
+  import E1Q3SuiteIO._
 
-  def mkTest(i: Int): ((Int, Int), Int, String) = { 
-    if (i == 1) ((42, 0), 1, "power of 0")
-    else if (i == 2) ((101, 1), 101, "power of 1")
-    else if (i == 3) ((64, 2), 4096, "power of 2")
-    else if (i == 4) ((666, 3), 295408296, "power of 3")
-    else if (i == 5) ((7, 10), 282475249, "power of 10")
-    else ((42, 0), 1, "power of 0")
-  }
 
-  test("test everything (10pts)") {
-    (1 to 5).foreach((i: Int) => {
-      val (in, out, msg) = mkTest(i)
-      assertEquals(fastExp(in._1, in._2), out, msg)
-    })
-  }
+  extension (t: Tests) 
 
-  test("power of 0 (10pts)") {
-    assertEquals(fastExp(42, 0), 1)
-  }
+    def msg: String = 
+      t match    
+        case e: ExceptionIsThrown => 
+          val (b, exp) = e.arg
+          s"An exception should have been thrown for $b at the power of $exp"
+        case s: SimpleCaseWorks =>
+          val exp = s.arg._2
+          s"Fail with an exponent of $exp"
 
-  test("power of 1 (10pts)") {
-    assertEquals(fastExp(101, 1), 101)
-  }
+    def title: String = 
+      t match 
+        case ExceptionIsThrown(arg, pts) =>
+          val (b, exp) = arg
+          s"Exception is thrown when $b at the power of $exp ($pts pts)"
+        case SimpleCaseWorks(arg, exp, pts) =>
+          val (b, exp) = arg 
+          s"Case $b to the power of $exp ($pts pts)"
+    
+    def execute: Unit = 
+      t match 
+        case e: ExceptionIsThrown =>
+          intercept[IllegalArgumentException] {
+            fastExp(e.arg._1, e.arg._2)
+          }
+        case s: SimpleCaseWorks =>
+          assertEquals(fastExp(s.arg._1, s.arg._2), s.exp, s.msg)
 
-  test("power of 2 (10pts)") {
-    assertEquals(fastExp(64, 2), 4096)
-  }
-
-  test("power of 3 (10pts)") {
-    assertEquals(fastExp(666, 3), 295408296)
-  }
-
-  test("power of 10 (10pts)") {
-    assertEquals(fastExp(7, 10), 282475249)
-  }
+  allTests.foreach(t =>
+    test(t.title) { t.execute }  
+  )
 
   override val munitTimeout = scala.concurrent.duration.Duration(1, "s")
-}
