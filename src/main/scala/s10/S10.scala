@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s10
 
-object S10 {
+object S10:
 
   /**
     *
@@ -11,5 +10,3 @@ object S10 {
     * @return The list obtained by uncompressing the tuples of `ls`
     */
   def uncompress(ls: List[(Int, Char)]): List[Char] = ???
-
-}
