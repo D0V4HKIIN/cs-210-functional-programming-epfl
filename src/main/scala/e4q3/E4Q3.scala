@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e4q3
 
-object E4Q3 {
+object E4Q3:
 
   abstract class Expr
   case class Number(x: Int) extends Expr
@@ -17,5 +16,3 @@ object E4Q3 {
   * @return The simplified version of `expr`
   */
   def simplify(expr: Expr): Expr = ???
-
-}
