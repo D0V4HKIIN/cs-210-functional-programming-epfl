@@ -1,36 +1,33 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s2
 
 /**
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class S2Suite extends munit.FunSuite {
+class S2Suite extends munit.FunSuite:
 
   import S2._
+  import S2SuiteIO._
 
-  def mkTest(i: Int): (List[Int], Option[Int], String) = { 
-    if (i == 1) (List(), None, "last element of an empty list")
-    else if (i == 2) (List(5, 9, 7), Some(7), "last element of a non-empty list 3")
-    else (List(), None, "last element of an empty list")
-  }
+  extension (t: Tests)
+    def title: String =
+      t match
+        case LastOnSimpleCase(arg, _, pts) =>
+          s"Last works on an array of size ${arg.length} ($pts pts)"
 
-  test("test everything (10pts)") {
-    (1 to 2).foreach((i: Int) => {
-      val (in, out, msg) = mkTest(i)
-      assertEquals(last(in), out, msg)
-    })
-  }
-
-  test("last element of an empty list (10pts)") {
-    assertEquals(last(List()), None)
-  }
-
-  test("last element of a non-empty list 3 (10pts)") {
-    assertEquals(last(List(5, 9, 7)), Some(7))
-  }
-
+    def msg: String =
+      t match
+        case LastOnSimpleCase(arg, _, _) =>
+          s"Wrong result for an array of size ${arg.length}"
+  
+    def execute: Unit =
+      t match
+        case l: LastOnSimpleCase =>
+          assertEquals(last(l.arg.toList), l.exp, l.msg)
+      
+  allTests.foreach(t => 
+    test(t.title) { t.execute }
+  )
 
   override val munitTimeout = scala.concurrent.duration.Duration(1, "s")
-}

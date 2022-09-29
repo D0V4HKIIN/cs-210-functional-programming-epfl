@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s2
 
-object S2 {
+object S2:
 
   /**
    *
@@ -12,4 +11,3 @@ object S2 {
    */
   def last(ls: List[Int]): Option[Int] = ???
 
-}
