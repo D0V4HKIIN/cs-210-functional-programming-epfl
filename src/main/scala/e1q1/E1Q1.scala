@@ -1,18 +1,16 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e1q1
 
 import annotation.tailrec
 
-object E1Q1 {
+object E1Q1:
 
   /**
    *
    * @param n A natural number
-   * @return The factorial of `n`
+   * @return The E1Q1.factorial of `n`
    */
-  def factorial(n: Int): Int = fact(n, 1)
-  def fact(k: Int, acc: Int): Int = ???
-
-}
+  def factorial(n: Int): Int = 
+    def fact(k: Int, acc: Int): Int = ???
+    fact(n, 1)
