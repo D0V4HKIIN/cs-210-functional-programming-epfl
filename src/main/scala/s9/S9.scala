@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s9
 
-object S9 {
+object S9:
 
   /**
     *
@@ -11,5 +10,3 @@ object S9 {
     * @return The list obtained by applying the run-length encoding data compression method on `ls`
     */
   def runLength(ls: List[Char]): List[(Int, Char)] = ???
-
-}
