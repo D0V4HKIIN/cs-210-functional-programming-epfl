@@ -1,9 +1,8 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package s4
 
-object S4 {
+object S4:
 
   /**
     *
@@ -12,4 +11,3 @@ object S4 {
     */
   def length(ls: List[Int]): Int = ???
 
-}
