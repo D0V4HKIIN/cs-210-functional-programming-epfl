@@ -1,34 +1,26 @@
-/* Copyright 2021 EPFL, Lausanne */
-/* Author: Nicolas Matekalo */
+/* Copyright 2022 EPFL, Lausanne */
 
 package e4q1
 
-object E4Q1 {
+object E4Q1:
 
   /**
    *
    * The subtyping relation of each line in the table (`>:`, `<:` or `X`). Hence they are string values.
+   * They are 
    */
-  val line1 = ???
+  type Answer = String
 
-  val line2 = ???
+  val lines: Array[Answer] = ???
 
-  val line3 = ???
+  /*Exemple :
+    Array(
+      "<:", //first line (#0)
+      ":>", //second line (#1)
+      "X", // ...
+      "X",
+      "<:"
+    )
+  */
 
-  val line4 = ???
-
-  val line5 = ???
-
-  val line6 = ???
-
-  val line7 = ???
-
-  val line8 = ???
-
-  val line9 = ???
-
-  val line10 = ???
-
-  val line11 = ???
-
-}
+  assert(lines.length == 11, "The array must contains all answers ! (11 lines)")
