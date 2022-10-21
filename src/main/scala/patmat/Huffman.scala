@@ -77,7 +77,7 @@ trait Huffman extends HuffmanInterface:
   def times(chars: List[Char]): List[(Char, Int)] =
     def countLetter(chars: List[Char], char: Char): Int =
       chars.count(_ == char)
-    if chars.isEmpty then List.empty
+    if chars.isEmpty then Nil
     else
       times(chars.filterNot(_ == chars.head))
         .concat(List((chars.head, chars.count(_ == chars.head))))
@@ -331,7 +331,7 @@ trait Huffman extends HuffmanInterface:
               if char == leafChar then getEncodedChar(left, char, bits :+ 0)
               else getEncodedChar(right, char, bits :+ 1)
 
-    val firstChar = getEncodedChar(tree, text.head, List.empty)
+    val firstChar = getEncodedChar(tree, text.head, Nil)
     text.tail match
       case Nil  => firstChar
       case tail => firstChar ::: encode(tree)(tail)
