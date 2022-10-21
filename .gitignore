@@ -13,6 +13,7 @@ logs/
 .idea
 .metals
 .vscode
+.scalafmt
 *.csv
 *.dat
 .bsp
