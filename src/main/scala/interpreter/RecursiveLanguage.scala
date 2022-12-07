@@ -1,5 +1,7 @@
 package interpreter
 
+import scala.annotation.alpha
+
 object RecursiveLanguage {
   /** Expression tree, also called Abstract Syntax Tree (AST) */
   enum Expr:
@@ -22,7 +24,7 @@ object RecursiveLanguage {
 
   /** Primitive operations that operation on constant values. */
   enum BinOps:
-    case Plus, Minus, Times, DividedBy, Modulo, LessEq
+    case Plus, Minus, Times, DividedBy, Modulo, LessEq, Eq
   import BinOps._
 
   def evalBinOp(op: BinOps)(ex: Expr, ey: Expr): Expr =
@@ -31,6 +33,7 @@ object RecursiveLanguage {
       case (Minus,  Constant(x), Constant(y)) => Constant(x - y)
       case (Times,  Constant(x), Constant(y)) => Constant(x * y)
       case (LessEq, Constant(x), Constant(y)) => Constant(if x <= y then 1 else 0)
+      case (Eq, Constant(x), Constant(y)) => Constant(if (x == y) then 1 else 0)
       case (Modulo,    Constant(x), Constant(y)) => if y == 0 then error("Division by zero") else Constant(x % y)
       case (DividedBy, Constant(x), Constant(y)) => if y == 0 then error("Division by zero") else Constant(x / y)
       case _ => error(s"Type error in ${show(BinOp(op, ex, ey))}")
@@ -68,7 +71,16 @@ object RecursiveLanguage {
             Logger.log(s"+--> ${show(res)}")
             res
           case _ => error(s"Cannot apply non-function ${show(eFun)} in a call")
-
+      // add cases for Empty, Cons and Match
+      case Empty => Empty
+      case Cons(head, tail) => Cons(eval(head, defs), eval(tail, defs))
+      case Match(scrutinee, caseEmpty, headName, tailName, caseCons) => 
+        val eScrut = eval(scrutinee, defs)
+        eScrut match
+          case Expr.Empty => caseEmpty
+          case Expr.Cons(head, tail) => eval(subst(subst(caseCons, headName, head), tailName, tail), defs)
+          case _ => error(s"Cannot match anything else than lists")
+        
 
   /** Substitutes Name(n) by r in e. */
   def subst(e: Expr, n: String, r: Expr): Expr =
@@ -97,21 +109,29 @@ object RecursiveLanguage {
           else
             // Otherwise, substitute in the function body anyway.
             Fun(param, subst(body, n, r))
-      case Empty => ???
-      case Cons(head, tail) => ???
+      case Empty => Empty
+      case Cons(head, tail) => Cons(subst(head, n, r), subst(tail, n, r))
       case Match(scrutinee, caseEmpty, headName, tailName, caseCons) =>
         if headName == n || tailName == n then
           // If n conflicts with headName or tailName, there cannot be a reference
           // to n in caseCons. Simply substite n by r in scrutinee and caseEmpty.
-          ???
+          Match(subst(scrutinee, n, r) , subst(caseEmpty, n , r), headName, tailName, caseCons)
         else
+          val fvs = freeVars(r)
           // If the free variables in r contain headName or tailName, the naive
           // substitution would change their meaning to reference to pattern binds.
-
-          // Perform alpha conversion in caseCons to eliminate the name collision.
-
-          // Otherwise, substitute in scrutinee, caseEmpty & caseCons anyway.
-          ???
+          if fvs.contains(headName) || fvs.contains(tailName) then
+            // Perform alpha conversion in caseCons to eliminate the name collision.
+            val headName1 = differentName(headName, fvs)
+            val tailName1 = differentName(tailName, fvs)
+            val caseCons1 = alphaConvert(caseCons, headName, headName1)
+            val caseCons2 = alphaConvert(caseCons1, tailName, tailName1)
+            Match(subst(scrutinee, n, r) , subst(caseEmpty, n, r), headName1, tailName1, subst(caseCons2, n, r))
+          else
+            // Otherwise, substitute in scrutinee, caseEmpty & caseCons anyway.
+            // If the free variables in r contain param the naive substitution would
+            // change the meaning of param to reference to the function parameter.
+            Match(subst(scrutinee, n, r), subst(caseEmpty, n, r), headName, tailName, subst(caseCons, n, r))
 
   def differentName(n: String, s: Set[String]): String =
     if s.contains(n) then differentName(n + "'", s)
@@ -127,6 +147,12 @@ object RecursiveLanguage {
       case Call(f, arg) => freeVars(f) ++ freeVars(arg)
       case Fun(param, body) => freeVars(body) - param
       // TODO: Add cases for Empty, Cons & Match
+      case Empty => Set()
+      case Cons(head, tail) => freeVars(head) ++ freeVars(tail)
+      case Match(scrut, caseEmpty, headName, tailName, caseCons) => scrut match
+        case Expr.Empty => freeVars(scrut) ++ freeVars(caseEmpty)
+        case Expr.Cons(head, tail) => freeVars(scrut) ++ freeVars(caseCons)
+        case _ => freeVars(scrut) ++ freeVars(caseEmpty) ++ freeVars(caseCons)
 
   /** Substitutes Name(n) by Name(m) in e. */
   def alphaConvert(e: Expr, n: String, m: String): Expr =
@@ -145,6 +171,10 @@ object RecursiveLanguage {
         if param == n then e
         else Fun(param, alphaConvert(body, n, m))
       // TODO: Add cases for Empty, Cons & Match
+      case Empty => Empty
+      case Cons(head, tail) => Cons(alphaConvert(head, n, m), alphaConvert(tail, n, m))
+      case Match(scrut, caseEmtpy, headName, tailName, caseCons) => if headName == n || tailName == n then e else Match(alphaConvert(scrut, n, m), alphaConvert(caseEmtpy, n, m), headName, tailName, alphaConvert(caseCons, n, m))
+
 
   case class EvalException(msg: String) extends Exception(msg)
 
@@ -165,11 +195,15 @@ object RecursiveLanguage {
           case DividedBy => "/"
           case Modulo    => "%"
           case LessEq    => "<="
+          case Eq    => "=="
         s"($opString ${show(e1)} ${show(e2)})"
       case IfNonzero(cond, caseTrue, caseFalse) =>
         s"(if ${show(cond)} then ${show(caseTrue)} else ${show(caseFalse)})"
       case Call(f, arg) => show(f) + "(" + show(arg) + ")"
       case Fun(n, body) => s"($n => ${show(body)})"
+      case Empty => "Empty"
+      case Cons(head, tail) => s"Cons(${show(head)}, ${show(tail)})"
+      case Match(scrutinee, caseEmpty, headName, tailName, caseCons) => s"$scrutinee match { case Empty => $caseEmpty; case $headName :: $tailName => $caseCons}"
 
   /** Pretty print top-level definition as a String. */
   def showEnv(env: Map[String, Expr]): String =
@@ -207,20 +241,66 @@ object RecursiveLanguage {
       Call(N("f"), Call(N("f"), N("x"))))),
 
     // TODO Implement map (see recitation session)
-    "map" -> Empty,
+    "map" -> Fun("ls", Fun("f", 
+      Match(Name("ls"), 
+        Empty,
+        "x", "xs", 
+        Cons(Call(Name("f"), Name("x")), Call(Call(Name("map"), Name("xs")), Name("f")))
+      )
+    )),
 
     // TODO Implement gcd (see recitation session)
-    "gcd" -> Empty,
+    "gcd" -> Fun("a", Fun("b",
+      IfNonzero(BinOp(Eq, Name("b"), Constant(0)), // Name("b"), 
+        Name("a"),
+        Call(Call(Name("gcd"), Name("b")), BinOp(Modulo, Name("a"), Name("b"))))
+    )),
 
     // TODO Implement foldLeft (see recitation session)
-    "foldLeft" -> Empty,
+    "foldLeft" -> Fun("ls", Fun("acc", Fun("f", 
+      Match(Name("ls"),
+        Name("acc"),
+        "x", "xs", 
+        Call(Call(Call(Name("foldLeft"),
+          Name("xs")),
+          Call(Call(Name("f"),
+            Name("acc")),
+            Name("x"))),
+          Name("f"))
+      )
+    ))),
 
     // TODO Implement foldRight (analogous to foldLeft, but operate right-to-left)
-    "foldRight" -> Empty,
+    "foldRight" -> Fun("ls", Fun("acc", Fun("f", 
+      Match(Name("ls"),
+        Name("acc"),
+        "x", "xs", 
+          Call(Call(Name("f"),
+            Name("x")),
+            Call(Call(Call(Name("foldRight"),
+              Name("xs")),
+              Name("acc")),
+              Name("f"))
+          )
+      )
+    ))),
   )
 
   def main(args: Array[String]): Unit =
     println(showEnv(definitions))
     tracingEval(Call(N("fact"), C(6)), definitions)
     tracingEval(Call(Call(N("twice"), N("square")), C(3)), definitions)
+
+    // own stuff
+    val sum = "sum" -> Fun("a", Fun("b", BinOp(BinOps.Plus, N("a"), N("b"))))
+    val div = "div" -> Fun("a", Fun("b", BinOp(BinOps.DividedBy, N("a"), N("b"))))
+
+    val list1 = Cons(C(1), Cons(C(2), Cons(C(3), Empty)))
+    val call1 = Call(Call(Call(N("foldLeft"), list1), C(100)), N("sum"))
+    tracingEval(call1, definitions + sum)
+
+
+    val list2 = Cons(C(1000000), Cons(C(20000), Cons(C(3000), Cons(C(400), Cons(C(50), Cons(C(6), Empty))))))
+    val call2 = Call(Call(Call(N("foldRight"), list2), C(1)), N("div"))
+    tracingEval(call2, definitions + div)
 }
