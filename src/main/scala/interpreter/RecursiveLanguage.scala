@@ -149,10 +149,7 @@ object RecursiveLanguage {
       // TODO: Add cases for Empty, Cons & Match
       case Empty => Set()
       case Cons(head, tail) => freeVars(head) ++ freeVars(tail)
-      case Match(scrut, caseEmpty, headName, tailName, caseCons) => scrut match
-        case Expr.Empty => freeVars(scrut) ++ freeVars(caseEmpty)
-        case Expr.Cons(head, tail) => freeVars(scrut) ++ freeVars(caseCons)
-        case _ => freeVars(scrut) ++ freeVars(caseEmpty) ++ freeVars(caseCons)
+      case Match(scrut, caseEmpty, headName, tailName, caseCons) => freeVars(scrut) ++ freeVars(caseEmpty) ++ freeVars(caseCons) - headName - tailName
 
   /** Substitutes Name(n) by Name(m) in e. */
   def alphaConvert(e: Expr, n: String, m: String): Expr =
@@ -173,7 +170,9 @@ object RecursiveLanguage {
       // TODO: Add cases for Empty, Cons & Match
       case Empty => Empty
       case Cons(head, tail) => Cons(alphaConvert(head, n, m), alphaConvert(tail, n, m))
-      case Match(scrut, caseEmtpy, headName, tailName, caseCons) => if headName == n || tailName == n then e else Match(alphaConvert(scrut, n, m), alphaConvert(caseEmtpy, n, m), headName, tailName, alphaConvert(caseCons, n, m))
+      case Match(scrut, caseEmtpy, headName, tailName, caseCons) =>
+        if headName == n || tailName == n then e
+        else Match(alphaConvert(scrut, n, m), alphaConvert(caseEmtpy, n, m), headName, tailName, alphaConvert(caseCons, n, m))
 
 
   case class EvalException(msg: String) extends Exception(msg)
